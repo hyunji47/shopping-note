@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>쇼핑 노트</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#191c22;--sub:#8a91a0;--line:#eceef2;--accent:#2f7df6;--accent-soft:#e9f1ff;--accent-t:#fff;--good:#10a56a;--good-soft:#e3f6ee;--warn:#e5484d;--shadow:0 1px 2px rgba(20,30,50,.04),0 4px 14px rgba(20,30,50,.05)}
+:root[data-theme=dark]{--bg:#0f1115;--card:#1a1d24;--text:#eceef3;--sub:#8c93a3;--line:#272b35;--accent:#5b9bff;--accent-soft:#1c2a42;--accent-t:#0b1220;--good:#3ccf91;--good-soft:#173027;--warn:#ff6b70;--shadow:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",system-ui,sans-serif;font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased}
+body{max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:10;background:var(--bg);padding:calc(12px + env(safe-area-inset-top)) 20px 12px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0}
+.icon-btn{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600}
+.tabs{display:flex;background:var(--line);border-radius:12px;padding:3px;gap:3px}
+.tab{flex:1;padding:10px 0;text-align:center;font-weight:600;color:var(--sub);background:none;border:0;border-radius:10px;font-size:14px}
+.tab.on{color:var(--text);background:var(--card);box-shadow:var(--shadow)}
+main{padding:4px 20px 0}
+.page{display:none}.page.on{display:block}
+.card{background:var(--card);border-radius:18px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+input,select{width:100%;height:46px;font-size:16px;padding:0 14px;border:1.5px solid transparent;border-radius:12px;background:var(--bg);color:var(--text);outline:none;min-width:0;font-family:inherit}
+input::placeholder{color:var(--sub)}
+input:focus{border-color:var(--accent);background:var(--card)}
+.row{display:flex;gap:8px;align-items:center}
+.btn{height:46px;border:0;background:var(--accent);color:var(--accent-t);font-weight:700;font-size:15px;border-radius:12px;padding:0 18px;white-space:nowrap;font-family:inherit}
+.btn:active{opacity:.85}
+.btn.ghost{background:var(--card);color:var(--sub);box-shadow:var(--shadow);font-weight:600}
+.btn.block{width:100%}
+.listhead{display:flex;justify-content:space-between;align-items:flex-end;margin:2px 2px 10px}
+.listhead h2{font-size:17px;font-weight:800;margin:0;letter-spacing:-.01em}
+.listhead .prog{font-size:12.5px;color:var(--sub);margin-top:2px}
+.curbar select{width:auto;height:32px;font-size:13px;padding:0 26px 0 12px;border-radius:999px;background-color:var(--card);font-weight:600;box-shadow:var(--shadow)}
+#addForm{padding:12px}
+#listBox{padding:4px 16px}
+.item{display:flex;align-items:center;gap:12px;min-height:60px;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}
+.item input[type=checkbox]{appearance:none;-webkit-appearance:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);background:var(--bg);flex:none;padding:0;margin:0;cursor:pointer;transition:.15s}
+.item input[type=checkbox]:checked{background:var(--good) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/16px no-repeat;border-color:var(--good)}
+.item .name{flex:1;min-width:0;font-size:16px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item.done .name{text-decoration:line-through;color:var(--sub);font-weight:500}
+.item .price{width:84px;height:36px;flex:none;text-align:center;padding:0 6px;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;border-radius:10px}
+.item.done .price{color:var(--sub)}
+.del{flex:none;width:28px;height:28px;display:grid;place-items:center;background:none;border:0;color:var(--sub);font-size:20px;line-height:1;border-radius:50%;padding:0;opacity:.7}
+.empty{text-align:center;color:var(--sub);padding:44px 0;font-size:14px}
+.empty .ic{font-size:34px;display:block;margin-bottom:8px;opacity:.8}
+.totalbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);box-shadow:0 -6px 24px rgba(20,30,50,.07);border-radius:20px 20px 0 0;padding:14px 22px calc(14px + env(safe-area-inset-bottom))}
+.totalbar .in{max-width:520px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.totalbar small{color:var(--sub);display:block;font-size:12px;font-weight:600;margin-bottom:2px}
+.totalbar b{font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.totalbar .r b{font-size:17px;color:var(--good)}
+.totalbar .r{text-align:right}
+.lbl{font-size:13px;color:var(--sub);margin:2px 0 6px;display:block;font-weight:600}
+.preview{width:100%;max-height:200px;object-fit:contain;border-radius:12px;margin-top:10px;display:none}
+.status{font-size:13px;color:var(--sub);margin-top:8px;min-height:18px}
+.res{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;align-items:center}
+.res:last-child{border:0}
+.res img{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--bg);flex:none}
+.res .t{flex:1;min-width:0;font-size:14px;line-height:1.35}
+.res .m{color:var(--sub);font-size:12px;margin-top:3px}
+.res .p{font-weight:700;font-size:16px;white-space:nowrap}
+.res .sub{color:var(--sub);font-size:12px}
+.badge{display:inline-block;background:var(--good);color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;margin-bottom:4px;font-weight:700}
+.mall{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-bottom:1px dashed var(--line)}
+.mall:last-child{border:0}
+h3{font-size:15px;font-weight:800;margin:0 0 12px}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.links a{display:block;text-align:center;text-decoration:none;color:var(--text);background:var(--bg);border-radius:12px;padding:12px 6px;font-size:14px;font-weight:600}
+.jp .sub{color:var(--sub);font-size:12px}
+details summary{cursor:pointer;font-weight:700;font-size:14px}
+pre{white-space:pre-wrap;font-size:11px;background:var(--bg);padding:8px;border-radius:8px;overflow:auto;max-height:180px}
+.note{font-size:12px;color:var(--sub);line-height:1.5;margin-top:8px}
+.curbtn{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px 0 4px;border:0;border-radius:999px;background:var(--card);color:var(--text);box-shadow:var(--shadow);font-size:13px;font-weight:700;font-family:inherit}
+.curbtn .cs{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:800}
+.curbtn svg{width:12px;height:12px;stroke:var(--sub);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(10,15,25,.5);display:none;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.sheet{width:100%;max-width:520px;background:var(--card);border-radius:24px 24px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));max-height:80vh;overflow:auto;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.sheet .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.sheet h4{margin:0 4px 8px;font-size:16px;font-weight:800}
+.copt{display:flex;align-items:center;gap:12px;width:100%;padding:11px 10px;border:0;background:none;color:var(--text);border-radius:14px;text-align:left;font-family:inherit}
+.copt.on{background:var(--accent-soft)}
+.copt .cs{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--bg);font-size:16px;font-weight:800;flex:none}
+.copt.on .cs{background:var(--accent);color:var(--accent-t)}
+.copt .tx{flex:1;min-width:0}
+.copt .tx b{display:block;font-size:15px}
+.copt .tx span{font-size:12px;color:var(--sub)}
+.copt .ck{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;visibility:hidden}
+.copt.on .ck{visibility:visible}
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><h1>🛒 쇼핑 노트</h1><button class="icon-btn" id="themeBtn">🌙 다크</button></div>
+  <div class="tabs">
+    <button class="tab on" data-p="list">체크리스트</button>
+    <button class="tab" data-p="search">최저가 검색</button>
+  </div>
+</header>
+
+<main>
+<!-- 체크리스트 -->
+<section class="page on" id="p-list">
+  <div class="listhead"><div><h2>쇼핑 목록</h2><div class="prog" id="prog"></div></div><div class="curbar" id="curBar"></div></div>
+  <div class="card" id="addForm">
+    <div class="row">
+      <input id="inName" placeholder="상품명" autocomplete="off" style="flex:1">
+      <input id="inPrice" type="text" inputmode="decimal" autocomplete="off" placeholder="가격" style="width:88px;flex:none;text-align:center">
+      <button class="btn" type="button" id="addBtn" style="padding:11px 14px">추가</button>
+    </div>
+  </div>
+  <div class="card" id="listBox"></div>
+  <button class="btn ghost block" id="clearDone">구입 완료 항목 삭제</button>
+</section>
+
+<!-- 검색 -->
+<section class="page" id="p-search">
+  <div class="card">
+    <label class="lbl">상품 촬영 → 텍스트 인식</label>
+    <input type="file" id="cam" accept="image/*" capture="environment" hidden>
+    <button class="btn ghost block" id="camBtn">📷 상품 촬영 / 사진 선택</button>
+    <img class="preview" id="preview" alt="">
+    <div class="status" id="ocrStatus"></div>
+    <label class="lbl" style="margin-top:10px">검색어 (인식 결과를 수정할 수 있어요)</label>
+    <div class="row">
+      <input id="q" placeholder="상품명 입력" autocomplete="off">
+      <button class="btn" id="goBtn">검색</button>
+    </div>
+    <div class="status" id="searchStatus"></div>
+  </div>
+
+  <div class="card" id="resCard" style="display:none">
+    <h3>🇰🇷 네이버 쇼핑 결과</h3>
+    <div id="best"></div>
+    <div id="results"></div>
+  </div>
+  <div class="card" id="mallCard" style="display:none">
+    <h3>쇼핑몰별 최저가</h3>
+    <div id="malls"></div>
+  </div>
+  <div class="card">
+    <h3>바로가기</h3>
+    <div class="links" id="krLinks"></div>
+  </div>
+
+  <div class="card">
+    <h3>🇯🇵 일본 오프라인 매장 가격 (네이버 블로그·카페, 최근 3개월)</h3>
+    <div class="row">
+      <input id="jpRate" type="number" step="0.01" inputmode="decimal" placeholder="100엔당 원 (예: 930)">
+      <button class="btn" id="jpGo">가격 찾기</button>
+    </div>
+    <div class="status" id="jpStatus"></div>
+    <div id="jpList"></div>
+    <div class="links" id="jpLinks" style="margin-top:10px"></div>
+    <p class="note">블로그·카페 글의 제목과 본문 요약에서 엔화 가격을 추출한 값이라 정확하지 않을 수 있어요. 카드를 눌러 원문에서 꼭 확인하세요. 카페 글은 날짜 정보가 제공되지 않습니다.</p>
+  </div>
+
+  <div class="card">
+    <details id="cfgBox">
+      <summary>⚙️ 네이버 검색 API 설정</summary>
+      <p class="note">브라우저에서 네이버 API를 직접 호출하면 CORS로 막혀, 중계 주소(프록시)가 필요합니다. 설정이 없으면 위 '바로가기'로 검색하세요. 키는 이 기기에만 저장됩니다.</p>
+      <label class="lbl">Client ID</label><input id="cfgId" autocomplete="off">
+      <label class="lbl" style="margin-top:8px">Client Secret</label><input id="cfgSecret" type="password" autocomplete="off">
+      <label class="lbl" style="margin-top:8px">프록시 주소 (예: https://내워커.workers.dev/)</label><input id="cfgProxy" placeholder="https://...">
+      <button class="btn block" id="cfgSave" style="margin-top:10px">저장</button>
+      <p class="note">브라우저에서 네이버 API를 직접 호출하면 CORS로 막혀 중계 주소(프록시)가 필요합니다. 아래 코드를 Cloudflare Workers 등에 올리고 그 주소를 입력하세요. 국내 쇼핑·블로그·카페 검색이 모두 이 주소 하나로 동작합니다.</p>
+<pre>export default {
+ async fetch(req){
+  const h={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"*"};
+  if(req.method==="OPTIONS")return new Response(null,{headers:h});
+  const u=new URL(req.url);
+  const r=await fetch("https://openapi.naver.com/v1/search"+u.pathname+u.search,{headers:{
+   "X-Naver-Client-Id":req.headers.get("X-Naver-Client-Id"),
+   "X-Naver-Client-Secret":req.headers.get("X-Naver-Client-Secret")}});
+  return new Response(r.body,{headers:{...h,"Content-Type":"application/json"}});
+ }}</pre>
+    </details>
+  </div>
+</section>
+</main>
+
+<div class="totalbar" id="totalbar"><div class="in">
+  <div><small>전체 합계</small><b id="tAll">0원</b></div>
+  <div class="r"><small>구입 완료</small><b id="tDone">0원</b></div>
+</div></div>
+
+<div class="modal" id="curModal"><div class="sheet"><div class="grab"></div><h4>화폐 선택</h4><div id="curList"></div></div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const won=n=>(Number(n)||0).toLocaleString('ko-KR')+'원';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+
+/* 테마 */
+function applyTheme(t){document.documentElement.dataset.theme=t;$('#themeBtn').textContent=t==='dark'?'☀️ 라이트':'🌙 다크'}
+let theme=load('sn_theme','light');applyTheme(theme);
+$('#themeBtn').onclick=()=>{theme=theme==='dark'?'light':'dark';save('sn_theme',theme);applyTheme(theme)};
+
+/* 탭 */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.p));
+  $('#totalbar').style.display=b.dataset.p==='list'?'':'none';
+  scrollTo(0,0);
+});
+
+/* 화폐 */
+const CURS=[['KRW','대한민국','원'],['JPY','일본','엔'],['USD','미국','달러'],['EUR','유로존','유로'],['CNY','중국','위안'],['GBP','영국','파운드'],['THB','태국','바트'],['TWD','대만','신대만달러'],['VND','베트남','동']];
+let cur=load('sn_cur','KRW');if(!CURS.some(c=>c[0]===cur))cur='KRW';
+const sym=c=>{try{return new Intl.NumberFormat('ko-KR',{style:'currency',currency:c,currencyDisplay:'narrowSymbol'}).formatToParts(0).find(x=>x.type==='currency').value}catch{return c}};
+const fmt=n=>{n=Math.round((Number(n)||0)*100)/100;
+  if(cur==='KRW')return n.toLocaleString('ko-KR')+'원';
+  try{return new Intl.NumberFormat('ko-KR',{style:'currency',currency:cur,currencyDisplay:'narrowSymbol'}).format(n)}catch{return n+' '+cur}};
+/* 숫자 입력(쉼표) */
+const parseNum=v=>parseFloat(String(v).replace(/,/g,''))||0;
+const numStr=n=>Number(n).toLocaleString('en-US',{maximumFractionDigits:2});
+const decs=()=>['KRW','JPY','VND'].includes(cur)?0:2;
+function fmtField(el){
+  const raw=el.value,pos=el.selectionStart??raw.length;
+  const before=raw.slice(0,pos).replace(/[^\d.]/g,'').length;
+  let t=raw.replace(/[^\d.]/g,'');const di=t.indexOf('.');
+  if(di>=0)t=t.slice(0,di+1)+t.slice(di+1).replace(/\./g,'');
+  let [ip,dp]=t.split('.');ip=ip.replace(/^0+(?=\d)/,'');
+  let out=ip.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  if(dp!==undefined&&decs()>0)out+='.'+dp.slice(0,decs());
+  el.value=out;
+  let c=0,k=0;while(k<out.length&&c<before){if(/[\d.]/.test(out[k]))c++;k++}
+  try{el.setSelectionRange(k,k)}catch{}
+}
+/* 화폐 선택 모달 */
+function renderCur(){
+  $('#curBar').innerHTML=`<button class="curbtn" id="curBtn" aria-label="화폐 선택"><span class="cs">${esc(sym(cur))}</span>${cur}<svg viewBox="0 0 12 12"><path d="M2.5 4.5l3.5 3.5 3.5-3.5"/></svg></button>`;
+  $('#inPrice').placeholder='가격 ('+sym(cur)+')';
+}
+function closeCur(){$('#curModal').classList.remove('on')}
+function openCur(){
+  $('#curList').innerHTML=CURS.map(c=>`<button class="copt ${c[0]===cur?'on':''}" data-c="${c[0]}"><span class="cs">${esc(sym(c[0]))}</span>
+    <span class="tx"><b>${c[0]}</b><span>${c[1]} · ${c[2]}</span></span>
+    <svg class="ck" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg></button>`).join('');
+  $('#curModal').classList.add('on');
+}
+$('#curBar').addEventListener('click',e=>{if(e.target.closest('#curBtn'))openCur()});
+$('#curModal').addEventListener('click',e=>{
+  if(e.target.id==='curModal'){closeCur();return}
+  const b=e.target.closest('.copt');if(!b)return;
+  cur=b.dataset.c;save('sn_cur',cur);renderCur();render();closeCur();
+  const f=$('#inPrice');if(f.value){fmtField(f)}
+});
+
+/* 체크리스트 */
+function updProg(){const d=items.filter(i=>i.done).length;$('#prog').textContent=items.length?`${d}/${items.length} 완료`:'아직 비어 있어요'}
+let items=load('sn_items',[]);
+function render(){
+  const box=$('#listBox');
+  if(!items.length){box.innerHTML='<div class="empty"><span class="ic">🛍️</span>살 물건을 추가해 보세요</div>'}
+  else box.innerHTML=items.map(i=>`<div class="item ${i.done?'done':''}" data-id="${i.id}">
+    <input type="checkbox" ${i.done?'checked':''} data-a="chk">
+    <span class="name" title="${esc(i.name)}">${esc(i.name)}</span>
+    <input class="price" type="text" inputmode="decimal" autocomplete="off" placeholder="${sym(cur)}" value="${i.price?numStr(i.price):''}" data-a="price">
+    <button class="del" data-a="del" aria-label="삭제">×</button></div>`).join('');
+  $('#tAll').textContent=fmt(items.reduce((s,i)=>s+(+i.price||0),0));
+  $('#tDone').textContent=fmt(items.filter(i=>i.done).reduce((s,i)=>s+(+i.price||0),0));
+  save('sn_items',items);updProg();
+}
+function addItem(){
+  const name=$('#inName').value.trim();
+  if(!name){$('#inName').focus();return}
+  items.unshift({id:Date.now()+Math.random(),name,price:parseNum($('#inPrice').value),done:false});
+  $('#inName').value='';$('#inPrice').value='';render();$('#inName').focus()}
+$('#addBtn').addEventListener('click',addItem);
+$('#inPrice').addEventListener('input',e=>fmtField(e.target));
+['#inName','#inPrice'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addItem()}}));
+$('#listBox').addEventListener('change',e=>{
+  const row=e.target.closest('.item');if(!row)return;
+  const it=items.find(x=>x.id==row.dataset.id);if(!it)return;
+  if(e.target.dataset.a==='chk'){it.done=e.target.checked;render()}
+  if(e.target.dataset.a==='price'){it.price=parseNum(e.target.value);e.target.value=it.price?numStr(it.price):'';save('sn_items',items);updProg()}
+});
+$('#listBox').addEventListener('input',e=>{
+  if(e.target.dataset.a!=='price')return;
+  const it=items.find(x=>x.id==e.target.closest('.item').dataset.id);
+  fmtField(e.target);it.price=parseNum(e.target.value);
+  $('#tAll').textContent=fmt(items.reduce((s,i)=>s+(+i.price||0),0));
+  $('#tDone').textContent=fmt(items.filter(i=>i.done).reduce((s,i)=>s+(+i.price||0),0));
+  save('sn_items',items);updProg();
+});
+$('#listBox').addEventListener('click',e=>{
+  if(e.target.dataset.a!=='del')return;
+  const id=e.target.closest('.item').dataset.id;items=items.filter(x=>x.id!=id);render()});
+let clrT;
+$('#clearDone').onclick=function(){
+  if(!items.some(i=>i.done))return;
+  if(this.dataset.arm){items=items.filter(i=>!i.done);this.dataset.arm='';this.textContent='구입 완료 항목 삭제';clearTimeout(clrT);render();return}
+  this.dataset.arm='1';this.textContent='한 번 더 누르면 삭제돼요';
+  clrT=setTimeout(()=>{this.dataset.arm='';this.textContent='구입 완료 항목 삭제'},3000)};
+renderCur();render();
+
+/* OCR */
+$('#camBtn').onclick=()=>$('#cam').click();
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+$('#cam').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  const pv=$('#preview');pv.src=URL.createObjectURL(f);pv.style.display='block';
+  const st=$('#ocrStatus');st.textContent='인식 엔진 불러오는 중…';
+  try{
+    if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+    const {data}=await Tesseract.recognize(f,'kor+eng',{logger:m=>{
+      if(m.status==='recognizing text')st.textContent='텍스트 인식 중… '+Math.round(m.progress*100)+'%'}});
+    const text=data.text.split('\n').map(s=>s.replace(/[^\p{L}\p{N}\s.\-+&]/gu,' ').replace(/\s+/g,' ').trim()).filter(s=>s.length>=2);
+    if(!text.length){st.textContent='글자를 찾지 못했어요. 더 가까이서 다시 찍어 주세요.';return}
+    $('#q').value=text.slice(0,3).join(' ').slice(0,60);
+    st.textContent='인식 완료! 검색어를 확인하고 수정하세요.';
+  }catch(err){st.textContent='인식 실패: 인터넷 연결을 확인해 주세요.'}
+  e.target.value='';
+};
+
+/* 검색 */
+const cfg=load('sn_cfg',{id:'',secret:'',proxy:''});
+$('#cfgId').value=cfg.id;$('#cfgSecret').value=cfg.secret;$('#cfgProxy').value=cfg.proxy;
+$('#cfgSave').onclick=()=>{Object.assign(cfg,{id:$('#cfgId').value.trim(),secret:$('#cfgSecret').value.trim(),proxy:$('#cfgProxy').value.trim()});save('sn_cfg',cfg);$('#searchStatus').textContent='설정을 저장했어요.'};
+
+function links(q){
+  const e=encodeURIComponent(q);
+  $('#krLinks').innerHTML=[
+    ['네이버 쇼핑 (최저가순)',`https://search.shopping.naver.com/search/all?query=${e}&sort=price_asc`],
+    ['다나와',`https://search.danawa.com/dsearch.php?query=${e}`],
+    ['쿠팡',`https://www.coupang.com/np/search?q=${e}`],
+    ['에누리',`https://www.enuri.com/search.jsp?keyword=${e}`]
+  ].map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('');
+  const g=s=>`https://www.google.com/search?q=${encodeURIComponent(s)}&tbs=qdr:m3`;
+  $('#jpLinks').innerHTML=[
+    ['구글 · 일본 매장 가격',g(`${q} 価格 店頭 ヨドバシ ビックカメラ`)],
+    ['구글 · 일본 후기/가격',g(`${q} 日本 店頭価格 最安`)],
+    ['가격.com (kakaku)',`https://kakaku.com/search_results/${e}/`],
+    ['요도바시카메라',`https://www.yodobashi.com/?word=${e}`],
+    ['빅카메라',`https://www.biccamera.com/bc/category/?q=${e}`],
+    ['돈키호테',`https://www.google.com/search?q=${encodeURIComponent('ドン・キホーテ '+q+' 価格')}&tbs=qdr:m3`]
+  ].map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('');
+}
+links('');
+
+let domLow=0;
+const ready=()=>cfg.id&&cfg.secret&&cfg.proxy;
+async function api(path,params){
+  const url=cfg.proxy.replace(/\/?$/,'/')+path+'?'+new URLSearchParams(params);
+  const r=await fetch(url,{headers:{'X-Naver-Client-Id':cfg.id,'X-Naver-Client-Secret':cfg.secret}});
+  if(!r.ok)throw new Error(r.status);
+  return r.json();
+}
+const clean=s=>String(s||'').replace(/<[^>]+>/g,'').replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#0?39;/g,"'").replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+
+function jpLinks(q){
+  const e=encodeURIComponent((q?q+' ':'')+'일본 가격 엔');
+  $('#jpLinks').innerHTML=[
+    ['네이버 블로그 (3개월)',`https://search.naver.com/search.naver?ssc=tab.blog.all&query=${e}&nso=so:dd,p:3m`],
+    ['네이버 카페 (3개월)',`https://search.naver.com/search.naver?ssc=tab.cafe.all&query=${e}&nso=so:dd,p:3m`]
+  ].map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('');
+}
+
+/* 국내 최저가 */
+async function shop(q){
+  const d=await api('shop.json',{query:q,display:100,sort:'asc'});
+  const list=(d.items||[]).map(i=>({t:clean(i.title),p:+i.lprice,m:i.mallName||'기타',l:i.link})).filter(i=>i.p>0).sort((a,b)=>a.p-b.p);
+  if(!list.length){domLow=0;$('#resCard').style.display=$('#mallCard').style.display='none';return 0}
+  domLow=list[0].p;
+  $('#resCard').style.display=$('#mallCard').style.display='block';
+  $('#best').innerHTML=`<span class="badge">최저가 ${won(list[0].p)} · ${esc(list[0].m)}</span>`;
+  $('#results').innerHTML=list.slice(0,20).map((i,n)=>`<a class="res" href="${esc(i.l)}" target="_blank" rel="noopener">
+    <div style="width:22px;color:var(--sub);font-weight:700;flex:none">${n+1}</div>
+    <div class="t"><b>${esc(i.m)}</b><div class="m">${esc(i.t.slice(0,48))}</div></div>
+    <div class="p">${won(i.p)}</div></a>`).join('');
+  const mm={};list.forEach(i=>{if(!mm[i.m]||mm[i.m].p>i.p)mm[i.m]=i});
+  $('#malls').innerHTML=Object.values(mm).sort((a,b)=>a.p-b.p).map(i=>`<div class="mall"><span>${esc(i.m)}</span><b>${won(i.p)}</b></div>`).join('');
+  return list.length;
+}
+
+/* 일본 오프라인 가격 (네이버 블로그/카페 → 가격 추출) */
+const STORES=['돈키호테','돈키','빅카메라','요도바시','마츠모토키요시','마쓰모토키요시','마츠키요','선드럭','스기약국','웰시아','다이코쿠','로프트','도큐핸즈','핸즈','무인양품','무지','유니클로','다이소','코스트코','빅씨','세리아','캔두','쓰루하','산리오','포켓몬센터','디즈니스토어','ABC마트','ビックカメラ','ヨドバシ','ドンキ','ドン・キホーテ'];
+const YEN=/(?:¥|￥)\s*([\d,]{3,7})|([\d,]{3,7})\s*(?:엔|円|yen)/i;
+function parseJp(text){
+  const m=text.match(YEN);if(!m)return null;
+  const yen=parseInt((m[1]||m[2]).replace(/,/g,''),10);
+  if(!(yen>=100&&yen<=3000000))return null;
+  const st=STORES.find(s=>text.includes(s));
+  const k=text.indexOf(m[0]);
+  return{yen,store:st||'',snip:text.slice(Math.max(0,k-25),k+m[0].length+25)};
+}
+async function jpSearch(q){
+  const st=$('#jpStatus'),box=$('#jpList');
+  st.textContent='네이버 블로그·카페에서 가격 찾는 중…';box.innerHTML='';
+  const rate=+$('#jpRate').value||0;save('sn_rate',rate||'');
+  const term=q+' 일본 가격 엔';
+  const [bl,cf]=await Promise.allSettled([
+    api('blog.json',{query:term,display:100,sort:'date'}),
+    api('cafearticle.json',{query:term,display:100,sort:'date'})]);
+  const lim=Date.now()-90*864e5,seen=new Set(),cand=[];
+  const push=(it,date,kind)=>{
+    if(seen.has(it.link))return;
+    const text=clean(it.title)+' '+clean(it.description);
+    const p=parseJp(text);if(!p)return;
+    seen.add(it.link);
+    cand.push({...p,date,kind,title:clean(it.title),link:it.link,krw:rate?Math.round(p.yen*rate/100):0});
+  };
+  if(bl.status==='fulfilled')(bl.value.items||[]).forEach(it=>{
+    const d=it.postdate?new Date(it.postdate.replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3')):null;
+    if(d&&d.getTime()>=lim)push(it,d,'블로그')});
+  if(cf.status==='fulfilled')(cf.value.items||[]).forEach(it=>push(it,null,'카페'));
+  if(bl.status==='rejected'&&cf.status==='rejected'){st.textContent='검색에 실패했어요. 키·프록시 설정을 확인해 주세요.';return}
+  if(!cand.length){st.textContent='최근 3개월 글에서 가격 정보를 찾지 못했어요. 아래 링크로 직접 확인해 보세요.';return}
+  cand.sort((a,b)=>a.yen-b.yen);
+  const top=cand.slice(0,5);
+  st.textContent=`가격이 적힌 글 ${cand.length}건 중 낮은 순 ${top.length}건${rate?'':' · 100엔당 원 환율을 입력하면 원화로 비교돼요'}`;
+  box.innerHTML=top.map((x,n)=>{
+    let diff='';
+    if(x.krw&&domLow){const d=x.krw-domLow;
+      diff=`<div class="sub" style="color:${d<0?'var(--good)':'var(--warn)'}">국내 최저가보다 ${won(Math.abs(d))} ${d<0?'저렴':'비쌈'}</div>`}
+    return `<a class="res" href="${esc(x.link)}" target="_blank" rel="noopener">
+      <div class="t">${n===0?'<span class="badge">일본 최저</span><br>':''}<b>${esc(x.store||'매장 미확인')}</b>
+        <div class="m">${x.date?x.date.toLocaleDateString('ko-KR'):'날짜 확인불가'} · 네이버 ${x.kind}</div>
+        <div class="m">${esc(x.title.slice(0,40))}</div><div class="m">…${esc(x.snip)}…</div></div>
+      <div style="text-align:right;flex:none"><div class="p">¥${x.yen.toLocaleString()}</div>
+        ${x.krw?`<div class="sub">≈ ${won(x.krw)}</div>`:''}${diff}</div></a>`}).join('');
+}
+
+async function search(){
+  const q=$('#q').value.trim();const ss=$('#searchStatus');
+  if(!q){ss.textContent='검색어를 입력해 주세요.';return}
+  links(q);jpLinks(q);
+  if(!ready()){
+    ss.textContent='먼저 맨 아래 "네이버 검색 API 설정"을 입력해 주세요.';
+    $('#cfgBox').open=true;$('#cfgBox').scrollIntoView({behavior:'smooth'});return}
+  ss.textContent='검색 중…';$('#jpList').innerHTML='';$('#jpStatus').textContent='';
+  try{const n=await shop(q);ss.textContent=n?`국내 쇼핑 ${n}건`:'국내 쇼핑 결과가 없어요.'}
+  catch{ss.textContent='국내 최저가 검색 실패: 키·프록시 설정을 확인해 주세요.';domLow=0}
+  try{await jpSearch(q)}catch{$('#jpStatus').textContent='일본 가격 검색에 실패했어요.'}
+}
+$('#goBtn').onclick=search;
+$('#jpGo').onclick=()=>{const q=$('#q').value.trim();if(!q){$('#jpStatus').textContent='검색어를 입력해 주세요.';return}
+  if(!ready()){$('#cfgBox').open=true;$('#jpStatus').textContent='API 설정이 필요해요.';return}
+  jpLinks(q);jpSearch(q).catch(()=>{$('#jpStatus').textContent='일본 가격 검색에 실패했어요.'})};
+$('#q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+$('#jpRate').value=load('sn_rate','');
+jpLinks('');
+if(!ready())$('#cfgBox').open=true;
+
+</script>
+</body>
+</html>
