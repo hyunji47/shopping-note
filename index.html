@@ -137,7 +137,7 @@ pre{white-space:pre-wrap;font-size:11px;background:var(--bg);padding:8px;border-
     <div id="results"></div>
   </div>
   <div class="card" id="mallCard" style="display:none">
-    <h3>쇼핑몰별 최저가</h3>
+    <h3>쇼핑몰별 가격 범위</h3>
     <div id="malls"></div>
   </div>
   <div class="card">
@@ -417,8 +417,16 @@ async function shop(q){
     <div style="width:22px;color:var(--sub);font-weight:700;flex:none">${n+1}</div>
     <div class="t"><b>${esc(i.m)}</b><div class="m">${esc(i.t.slice(0,48))}</div></div>
     <div class="p">${won(i.p)}</div></a>`).join('');
-  const mm={};list.forEach(i=>{if(!mm[i.m]||mm[i.m].p>i.p)mm[i.m]=i});
-  $('#malls').innerHTML=Object.values(mm).sort((a,b)=>a.p-b.p).map(i=>`<div class="mall"><span>${esc(i.m)}</span><b>${won(i.p)}</b></div>`).join('');
+  const mm={};
+  list.forEach(i=>{
+    if(!mm[i.m])mm[i.m]={min:i.p,max:i.p,count:0};
+    mm[i.m].min=Math.min(mm[i.m].min,i.p);
+    mm[i.m].max=Math.max(mm[i.m].max,i.p);
+    mm[i.m].count++;
+  });
+  $('#malls').innerHTML=Object.entries(mm)
+    .sort((a,b)=>a[1].min-b[1].min)
+    .map(([mall,v])=>`<div class="mall"><span><b>${esc(mall)}</b><div class="sub">${v.count}개 상품 기준</div></span><b>${won(v.min)} ~ ${won(v.max)}</b></div>`).join('');
   return list.length;
 }
 
