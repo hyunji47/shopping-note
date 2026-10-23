@@ -131,22 +131,18 @@ pre{white-space:pre-wrap;font-size:11px;background:var(--bg);padding:8px;border-
     <div class="status" id="searchStatus"></div>
   </div>
 
-  <div class="card" id="resCard" style="display:none">
-    <h3>🇰🇷 네이버 쇼핑 결과</h3>
-    <div id="best"></div>
-    <div id="results"></div>
-  </div>
-  <div class="card" id="mallCard" style="display:none">
-    <h3>쇼핑몰별 가격 범위</h3>
-    <div id="malls"></div>
-  </div>
+  
+  
   <div class="card">
     <h3>바로가기</h3>
     <div class="links" id="krLinks"></div>
   </div>
 
   <div class="card">
-    <h3>🇯🇵 일본 오프라인 매장 가격 (네이버 블로그·카페, 최근 3개월)</h3>
+    <h3>🇯🇵 일본 오프라인 가격 비교 (네이버 블로그·카페, 최근 3개월)</h3>
+    <div class="row" style="margin-bottom:8px">
+      <input id="domPrice" type="text" inputmode="decimal" autocomplete="off" placeholder="내가 확인한 국내 가격(원)" style="flex:1">
+    </div>
     <div class="row">
       <input id="jpRate" type="number" step="0.01" inputmode="decimal" placeholder="100엔당 원 (예: 930)">
       <button class="btn" id="jpGo">가격 찾기</button>
@@ -159,11 +155,11 @@ pre{white-space:pre-wrap;font-size:11px;background:var(--bg);padding:8px;border-
 
   <div class="card">
     <details id="cfgBox">
-      <summary>⚙️ 네이버 검색 API 설정</summary>
-      <p class="note">브라우저에서 네이버 API를 직접 호출하면 CORS로 막혀, 중계 주소(프록시)가 필요합니다. 설정이 없으면 위 '바로가기'로 검색하세요. 키는 이 기기에만 저장됩니다.</p>
-      <label class="lbl">Client ID</label><input id="cfgId" autocomplete="off">
-      <label class="lbl" style="margin-top:8px">Client Secret</label><input id="cfgSecret" type="password" autocomplete="off">
-      <label class="lbl" style="margin-top:8px">프록시 주소 (예: https://내워커.workers.dev/)</label><input id="cfgProxy" placeholder="https://...">
+      <summary>⚙️ NAVER API HUB 설정</summary>
+      <p class="note">네이버 검색 API는 개발자센터에서 <b>NAVER API HUB(네이버클라우드플랫폼)</b>로 옮겨졌어요. NCP 콘솔의 NAVER API HUB에서 Application을 등록하고 <b>블로그·카페글 검색</b>을 선택한 뒤, 그 Application의 인증 정보에서 Client ID/Secret을 새로 확인하세요. 개발자센터 키는 쓸 수 없어요. 키는 이 기기에만 저장됩니다.</p>
+      <label class="lbl">Client ID (API 키 ID)</label><input id="cfgId" autocomplete="off">
+      <label class="lbl" style="margin-top:8px">Client Secret (API 키)</label><input id="cfgSecret" type="password" autocomplete="off">
+      <label class="lbl" style="margin-top:8px">프록시 주소 (예: https://내워커.workers.dev)</label><input id="cfgProxy" placeholder="https://...">
       <button class="btn block" id="cfgSave" style="margin-top:10px">저장</button>
       <div class="status" id="cfgMsg"></div>
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
@@ -177,16 +173,16 @@ pre{white-space:pre-wrap;font-size:11px;background:var(--bg);padding:8px;border-
         </div>
         <p class="note">⚠️ 설정 코드에는 Client Secret이 그대로 들어 있어요. 믿을 수 있는 사람이나 내 기기로만 보내세요. "공유"는 코드를 누르면 설정이 자동 적용되는 링크로 보냅니다.</p>
       </div>
-      <p class="note">브라우저에서 네이버 API를 직접 호출하면 CORS로 막혀 중계 주소(프록시)가 필요합니다. 아래 코드를 Cloudflare Workers 등에 올리고 그 주소를 입력하세요. 국내 쇼핑·블로그·카페 검색이 모두 이 주소 하나로 동작합니다.</p>
+      <p class="note">브라우저에서 API HUB를 직접 호출하면 CORS 때문에 막힐 수 있어, 중계 주소(프록시)를 둡니다. 아래 코드를 Cloudflare Workers에 붙여넣고 그 주소를 입력하세요.</p>
 <pre>export default {
  async fetch(req){
   const h={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"*"};
   if(req.method==="OPTIONS")return new Response(null,{headers:h});
   const u=new URL(req.url);
-  const r=await fetch("https://openapi.naver.com/v1/search"+u.pathname+u.search,{headers:{
-   "X-Naver-Client-Id":req.headers.get("X-Naver-Client-Id"),
-   "X-Naver-Client-Secret":req.headers.get("X-Naver-Client-Secret")}});
-  return new Response(r.body,{headers:{...h,"Content-Type":"application/json"}});
+  const r=await fetch("https://naverapihub.apigw.ntruss.com"+u.pathname+u.search,{headers:{
+   "X-NCP-APIGW-API-KEY-ID":req.headers.get("X-NCP-APIGW-API-KEY-ID"),
+   "X-NCP-APIGW-API-KEY":req.headers.get("X-NCP-APIGW-API-KEY")}});
+  return new Response(r.body,{status:r.status,headers:{...h,"Content-Type":"application/json"}});
  }}</pre>
     </details>
   </div>
@@ -391,8 +387,8 @@ let domLow=0;
 const ready=()=>cfg.id&&cfg.secret&&cfg.proxy;
 async function api(path,params){
   const url=cfg.proxy.replace(/\/?$/,'/')+path+'?'+new URLSearchParams(params);
-  const r=await fetch(url,{headers:{'X-Naver-Client-Id':cfg.id,'X-Naver-Client-Secret':cfg.secret}});
-  if(!r.ok)throw new Error(r.status);
+  const r=await fetch(url,{headers:{'X-NCP-APIGW-API-KEY-ID':cfg.id,'X-NCP-APIGW-API-KEY':cfg.secret}});
+  if(!r.ok){let t='';try{t=(await r.text()).slice(0,140)}catch{}throw new Error(r.status+(t?' '+t:''))}
   return r.json();
 }
 const clean=s=>String(s||'').replace(/<[^>]+>/g,'').replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#0?39;/g,"'").replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
@@ -403,31 +399,6 @@ function jpLinks(q){
     ['네이버 블로그 (3개월)',`https://search.naver.com/search.naver?ssc=tab.blog.all&query=${e}&nso=so:dd,p:3m`],
     ['네이버 카페 (3개월)',`https://search.naver.com/search.naver?ssc=tab.cafe.all&query=${e}&nso=so:dd,p:3m`]
   ].map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('');
-}
-
-/* 국내 최저가 */
-async function shop(q){
-  const d=await api('shop.json',{query:q,display:100,sort:'asc'});
-  const list=(d.items||[]).map(i=>({t:clean(i.title),p:+i.lprice,m:i.mallName||'기타',l:i.link})).filter(i=>i.p>0).sort((a,b)=>a.p-b.p);
-  if(!list.length){domLow=0;$('#resCard').style.display=$('#mallCard').style.display='none';return 0}
-  domLow=list[0].p;
-  $('#resCard').style.display=$('#mallCard').style.display='block';
-  $('#best').innerHTML=`<span class="badge">최저가 ${won(list[0].p)} · ${esc(list[0].m)}</span>`;
-  $('#results').innerHTML=list.slice(0,20).map((i,n)=>`<a class="res" href="${esc(i.l)}" target="_blank" rel="noopener">
-    <div style="width:22px;color:var(--sub);font-weight:700;flex:none">${n+1}</div>
-    <div class="t"><b>${esc(i.m)}</b><div class="m">${esc(i.t.slice(0,48))}</div></div>
-    <div class="p">${won(i.p)}</div></a>`).join('');
-  const mm={};
-  list.forEach(i=>{
-    if(!mm[i.m])mm[i.m]={min:i.p,max:i.p,count:0};
-    mm[i.m].min=Math.min(mm[i.m].min,i.p);
-    mm[i.m].max=Math.max(mm[i.m].max,i.p);
-    mm[i.m].count++;
-  });
-  $('#malls').innerHTML=Object.entries(mm)
-    .sort((a,b)=>a[1].min-b[1].min)
-    .map(([mall,v])=>`<div class="mall"><span><b>${esc(mall)}</b><div class="sub">${v.count}개 상품 기준</div></span><b>${won(v.min)} ~ ${won(v.max)}</b></div>`).join('');
-  return list.length;
 }
 
 /* 일본 오프라인 가격 (네이버 블로그/카페 → 가격 추출) */
@@ -445,10 +416,11 @@ async function jpSearch(q){
   const st=$('#jpStatus'),box=$('#jpList');
   st.textContent='네이버 블로그·카페에서 가격 찾는 중…';box.innerHTML='';
   const rate=+$('#jpRate').value||0;save('sn_rate',rate||'');
+  domLow=parseNum($('#domPrice').value);save('sn_dom',domLow||'');
   const term=q+' 일본 가격 엔';
   const [bl,cf]=await Promise.allSettled([
-    api('blog.json',{query:term,display:100,sort:'date'}),
-    api('cafearticle.json',{query:term,display:100,sort:'date'})]);
+    api('search/v1/blog',{query:term,display:100,sort:'date'}),
+    api('search/v1/cafearticle',{query:term,display:100,sort:'date'})]);
   const lim=Date.now()-90*864e5,seen=new Set(),cand=[];
   const push=(it,date,kind)=>{
     if(seen.has(it.link))return;
@@ -461,7 +433,7 @@ async function jpSearch(q){
     const d=it.postdate?new Date(it.postdate.replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3')):null;
     if(d&&d.getTime()>=lim)push(it,d,'블로그')});
   if(cf.status==='fulfilled')(cf.value.items||[]).forEach(it=>push(it,null,'카페'));
-  if(bl.status==='rejected'&&cf.status==='rejected'){st.textContent='검색에 실패했어요. 키·프록시 설정을 확인해 주세요.';return}
+  if(bl.status==='rejected'&&cf.status==='rejected'){st.textContent='검색 실패: '+String(bl.reason&&bl.reason.message||'알 수 없는 오류').slice(0,160)+' — 키·프록시 설정을 확인해 주세요.';return}
   if(!cand.length){st.textContent='최근 3개월 글에서 가격 정보를 찾지 못했어요. 아래 링크로 직접 확인해 보세요.';return}
   cand.sort((a,b)=>a.yen-b.yen);
   const top=cand.slice(0,5);
@@ -469,7 +441,7 @@ async function jpSearch(q){
   box.innerHTML=top.map((x,n)=>{
     let diff='';
     if(x.krw&&domLow){const d=x.krw-domLow;
-      diff=`<div class="sub" style="color:${d<0?'var(--good)':'var(--warn)'}">국내 최저가보다 ${won(Math.abs(d))} ${d<0?'저렴':'비쌈'}</div>`}
+      diff=`<div class="sub" style="color:${d<0?'var(--good)':'var(--warn)'}">내가 확인한 국내 가격보다 ${won(Math.abs(d))} ${d<0?'저렴':'비쌈'}</div>`}
     return `<a class="res" href="${esc(x.link)}" target="_blank" rel="noopener">
       <div class="t">${n===0?'<span class="badge">일본 최저</span><br>':''}<b>${esc(x.store||'매장 미확인')}</b>
         <div class="m">${x.date?x.date.toLocaleDateString('ko-KR'):'날짜 확인불가'} · 네이버 ${x.kind}</div>
@@ -482,13 +454,12 @@ async function search(){
   const q=$('#q').value.trim();const ss=$('#searchStatus');
   if(!q){ss.textContent='검색어를 입력해 주세요.';return}
   links(q);jpLinks(q);
+  ss.textContent='국내 가격은 아래 바로가기로 확인하고, 일본 가격은 자동으로 찾아요.';
   if(!ready()){
-    ss.textContent='먼저 맨 아래 "네이버 검색 API 설정"을 입력해 주세요.';
-    $('#cfgBox').open=true;$('#cfgBox').scrollIntoView({behavior:'smooth'});return}
-  ss.textContent='검색 중…';$('#jpList').innerHTML='';$('#jpStatus').textContent='';
-  try{const n=await shop(q);ss.textContent=n?`국내 쇼핑 ${n}건`:'국내 쇼핑 결과가 없어요.'}
-  catch{ss.textContent='국내 최저가 검색 실패: 키·프록시 설정을 확인해 주세요.';domLow=0}
-  try{await jpSearch(q)}catch{$('#jpStatus').textContent='일본 가격 검색에 실패했어요.'}
+    $('#jpStatus').textContent='일본 가격 자동 검색은 맨 아래 API 설정이 필요해요.';
+    $('#cfgBox').open=true;return}
+  $('#jpList').innerHTML='';$('#jpStatus').textContent='';
+  try{await jpSearch(q)}catch(e){$('#jpStatus').textContent='일본 가격 검색에 실패했어요: '+String(e.message||'').slice(0,160)}
 }
 $('#goBtn').onclick=search;
 $('#jpGo').onclick=()=>{const q=$('#q').value.trim();if(!q){$('#jpStatus').textContent='검색어를 입력해 주세요.';return}
@@ -496,6 +467,8 @@ $('#jpGo').onclick=()=>{const q=$('#q').value.trim();if(!q){$('#jpStatus').textC
   jpLinks(q);jpSearch(q).catch(()=>{$('#jpStatus').textContent='일본 가격 검색에 실패했어요.'})};
 $('#q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
 $('#jpRate').value=load('sn_rate','');
+$('#domPrice').value=load('sn_dom','')?numStr(load('sn_dom','')):'';
+$('#domPrice').addEventListener('input',e=>fmtField(e.target));
 jpLinks('');
 if(!ready())$('#cfgBox').open=true;
 
