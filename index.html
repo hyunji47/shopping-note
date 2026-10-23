@@ -407,8 +407,27 @@ function jpLinks(q){
 
 /* 국내 최저가 */
 async function shop(q){
-  const d=await api('shop.json',{query:q,display:100,sort:'asc'});
-  const list=(d.items||[]).map(i=>({t:clean(i.title),p:+i.lprice,m:i.mallName||'기타',l:i.link})).filter(i=>i.p>0).sort((a,b)=>a.p-b.p);
+  // 띄어쓰기 차이로 검색 결과가 누락되는 경우를 대비해 대체 검색어를 순서대로 시도
+  const variants=[q];
+  const compact=q.replace(/\s+/g,'');
+  if(compact && compact!==q) variants.push(compact);
+  const normalized=q.replace(/\s+/g,' ').trim();
+  if(normalized!==q && normalized) variants.push(normalized);
+  // 센카 퍼펙트 휩은 쇼핑몰마다 '퍼펙트휩'처럼 붙여 쓰는 경우가 있어 추가 표기를 시도
+  if(/센카/i.test(q) && /퍼펙트\s*휩/i.test(q)){
+    variants.push('센카 퍼펙트휩','센카 퍼펙트 휩','센카 퍼펙트휩 클렌징폼');
+  }
+  const unique=[...new Set(variants.map(v=>v.trim()).filter(Boolean))];
+  let raw=[];
+  for(const term of unique){
+    const d=await api('shop.json',{query:term,display:100,sort:'asc'});
+    raw=(d.items||[]);
+    if(raw.some(i=>Number(i.lprice)>0)) break;
+  }
+  const seen=new Set();
+  const list=raw.map(i=>({t:clean(i.title),p:+i.lprice,m:i.mallName||'기타',l:i.link}))
+    .filter(i=>i.p>0 && i.l && !seen.has(i.l) && seen.add(i.l))
+    .sort((a,b)=>a.p-b.p);
   if(!list.length){domLow=0;$('#resCard').style.display=$('#mallCard').style.display='none';return 0}
   domLow=list[0].p;
   $('#resCard').style.display=$('#mallCard').style.display='block';
