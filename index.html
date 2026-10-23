@@ -89,6 +89,28 @@ pre{white-space:pre-wrap;font-size:11px;background:var(--bg);padding:8px;border-
 .copt .tx span{font-size:12px;color:var(--sub)}
 .copt .ck{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;visibility:hidden}
 .copt.on .ck{visibility:visible}
+.ta{width:100%;font-size:14px;padding:10px 12px;border:1.5px solid transparent;border-radius:12px;background:var(--bg);color:var(--text);outline:none;resize:vertical;font-family:inherit}
+.ta:focus{border-color:var(--accent);background:var(--card)}
+.rowedit{display:flex;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.rowedit:last-child{border:0}
+.rowedit .m{flex:1;height:40px;font-size:15px}
+.rowedit .p{width:104px;flex:none;height:40px;text-align:center;font-weight:700;font-size:15px}
+.rowedit.low::before{content:'최저';flex:none;background:var(--good);color:#fff;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:8px}
+.rowedit.low .p{color:var(--good)}
+.cmpline{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0;font-size:14px;border-bottom:1px dashed var(--line)}
+.cmpline:last-of-type{border:0}
+.cmpline span{color:var(--sub);font-size:12px}
+.verdict{margin-top:10px;padding:12px;border-radius:12px;background:var(--accent-soft);font-weight:700;font-size:15px;text-align:center}
+.verdict.jp{background:var(--good-soft);color:var(--good)}
+.more>summary{list-style:none;background:var(--card);padding:15px 16px;border-radius:14px;box-shadow:var(--shadow);margin-bottom:14px;font-weight:700;font-size:14px;cursor:pointer}
+.more>summary::-webkit-details-marker{display:none}
+.more>summary::after{content:'＋';float:right;color:var(--sub)}
+.more[open]>summary::after{content:'－'}
+.qres{padding:12px;border-radius:12px;background:var(--bg);margin-bottom:8px}
+.qres .t{font-size:12.5px;color:var(--sub);font-weight:600}
+.qres .v{font-size:19px;font-weight:800;margin-top:2px;letter-spacing:-.01em}
+.qres .v.jp{color:var(--good)}
+.qres .s{font-size:12.5px;color:var(--sub);margin-top:3px}
 </style>
 </head>
 <body>
@@ -133,25 +155,82 @@ pre{white-space:pre-wrap;font-size:11px;background:var(--bg);padding:8px;border-
 
   
   
-  <div class="card">
-    <h3>바로가기</h3>
-    <div class="links" id="krLinks"></div>
+    <div class="card" id="qcCard">
+    <h3>⚡ 현장 바로 비교</h3>
+    <div class="row" style="align-items:flex-end">
+      <div style="flex:1;min-width:0"><label class="lbl">🇯🇵 매장 가격 (엔)</label>
+        <input id="qjYen" type="text" inputmode="numeric" autocomplete="off" placeholder="¥ 가격표 숫자" style="text-align:center;font-weight:700"></div>
+      <div style="width:104px;flex:none"><label class="lbl">표기</label>
+        <select id="qjTax"><option value="in">세금 포함</option><option value="ex">세금 별도</option></select></div>
+      <div style="width:76px;flex:none"><label class="lbl">세율</label>
+        <select id="qjRate"><option value="10">10%</option><option value="8">8%</option></select></div>
+    </div>
+    <div class="row" style="margin-top:10px;align-items:flex-end">
+      <div style="flex:1;min-width:0"><label class="lbl">🇰🇷 국내 최저가 (원)</label>
+        <input id="qkKrw" type="text" inputmode="numeric" autocomplete="off" placeholder="₩ 네이버쇼핑 등에서 확인" style="text-align:center;font-weight:700"></div>
+    </div>
+    <div class="links" id="qkLinks" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:12px;align-items:flex-end">
+      <div style="flex:1;min-width:0"><label class="lbl">일본 ○개입</label>
+        <input id="qjN" type="text" inputmode="numeric" autocomplete="off" value="1" style="text-align:center"></div>
+      <div style="flex:1;min-width:0"><label class="lbl">국내 ○개입</label>
+        <input id="qkN" type="text" inputmode="numeric" autocomplete="off" value="1" style="text-align:center"></div>
+      <div style="flex:1.3;min-width:0"><label class="lbl">환율 (100엔당 원)</label>
+        <input id="jpRate" type="text" inputmode="decimal" autocomplete="off" placeholder="예: 930" style="text-align:center"></div>
+    </div>
+    <div id="qcOut" style="margin-top:12px"></div>
+    <button class="btn block" id="qcSave" style="margin-top:10px">이 비교 기록하기</button>
+    <div id="hist" style="margin-top:6px"></div>
+    <p class="note">세금 표기는 가격표에 税込(세금 포함)인지 税抜(세금 별도)인지 보고 고르세요. 의약품·화장품은 보통 10%, 식품은 8%예요. 면세 적용 여부와 조건은 매장·시기에 따라 달라 직접 확인이 필요해요. 환전·카드 수수료는 포함되지 않아요.</p>
+  </div>
+
+  <details class="more">
+    <summary>상세 비교 · 국내 가격 목록과 일본 가격 기록</summary>
+
+  <div class="card" id="cmpCard">
+    <h3>📊 가격 비교 요약</h3>
+    <div id="cmp"></div>
   </div>
 
   <div class="card">
-    <h3>🇯🇵 일본 오프라인 가격 비교 (네이버 블로그·카페, 최근 3개월)</h3>
-    <div class="row" style="margin-bottom:8px">
-      <input id="domPrice" type="text" inputmode="decimal" autocomplete="off" placeholder="내가 확인한 국내 가격(원)" style="flex:1">
+    <h3>🇰🇷 국내 가격 (네이버쇼핑 등)</h3>
+    <div class="links" id="krLinks"></div>
+    <label class="lbl" style="margin-top:14px">검색 결과 붙여넣기 → 자동 정리</label>
+    <textarea id="pasteBox" class="ta" rows="4" placeholder="위 바로가기로 네이버쇼핑 결과를 연 뒤, 화면의 글자를 길게 눌러 전체 선택 → 복사해서 여기에 붙여넣으세요."></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="pasteGo" style="flex:1">정리하기</button>
+      <button class="btn ghost" id="addRow" style="flex:1">+ 직접 추가</button>
     </div>
-    <div class="row">
-      <input id="jpRate" type="number" step="0.01" inputmode="decimal" placeholder="100엔당 원 (예: 930)">
-      <button class="btn" id="jpGo">가격 찾기</button>
-    </div>
-    <div class="status" id="jpStatus"></div>
-    <div id="jpList"></div>
-    <div class="links" id="jpLinks" style="margin-top:10px"></div>
-    <p class="note">블로그·카페 글의 제목과 본문 요약에서 엔화 가격을 추출한 값이라 정확하지 않을 수 있어요. 카드를 눌러 원문에서 꼭 확인하세요. 카페 글은 날짜 정보가 제공되지 않습니다.</p>
+    <div class="status" id="pasteMsg"></div>
+    <div id="domRows"></div>
   </div>
+
+  <div class="card">
+    <h3>🇯🇵 일본 가격 (최근 3개월)</h3>
+    <div class="links" id="jpLinks" style="margin-top:10px"></div>
+    <label class="lbl" style="margin-top:14px">확인한 가격 기록</label>
+    <div class="row">
+      <input id="jpStore" list="storeList" autocomplete="off" placeholder="매장 (예: 마츠모토키요시)" style="flex:1">
+      <input id="jpYen" type="text" inputmode="numeric" autocomplete="off" placeholder="엔(¥)" style="width:96px;flex:none;text-align:center">
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input id="jpDate" type="date" style="flex:1">
+      <button class="btn" id="jpAdd">기록</button>
+    </div>
+    <datalist id="storeList"><option value="마츠모토키요시"><option value="돈키호테"><option value="빅카메라"><option value="요도바시카메라"><option value="선드럭"><option value="스기약국"><option value="다이코쿠드럭"><option value="웰시아"></datalist>
+    <div id="jpRec" style="margin-top:6px"></div>
+    <details style="margin-top:12px">
+      <summary>참고: 블로그·카페 자동 검색</summary>
+      <p class="note">네이버 블로그·카페 글에서 엔화 가격을 찾아 줘요. 맨 아래 API 설정이 필요하고, 글에서 뽑은 값이라 부정확할 수 있어요.</p>
+      <button class="btn ghost block" id="jpGo" style="margin-top:8px">블로그·카페에서 찾기</button>
+      <div class="status" id="jpStatus"></div>
+      <div id="jpList"></div>
+    </details>
+    <p class="note">기록한 가격은 90일이 지나면 목록에서 숨겨져요. 비교 금액에는 세금(면세), 배송비, 환전 수수료가 포함되지 않아요.</p>
+  </div>
+
+  
+</details>
 
   <div class="card">
     <details id="cfgBox">
@@ -321,7 +400,7 @@ $('#cam').onchange=async e=>{
     const text=data.text.split('\n').map(s=>s.replace(/[^\p{L}\p{N}\s.\-+&]/gu,' ').replace(/\s+/g,' ').trim()).filter(s=>s.length>=2);
     if(!text.length){st.textContent='글자를 찾지 못했어요. 더 가까이서 다시 찍어 주세요.';return}
     $('#q').value=text.slice(0,3).join(' ').slice(0,60);
-    st.textContent='인식 완료! 검색어를 확인하고 수정하세요.';
+    st.textContent='인식 완료! 검색어를 확인하고 수정하세요.';search();
   }catch(err){st.textContent='인식 실패: 인터넷 연결을 확인해 주세요.'}
   e.target.value='';
 };
@@ -364,26 +443,159 @@ $('#cfgImport').onclick=()=>{
 $('#cfgSave').onclick=()=>{Object.assign(cfg,{id:$('#cfgId').value.trim(),secret:$('#cfgSecret').value.trim(),proxy:$('#cfgProxy').value.trim()});save('sn_cfg',cfg);cfgMsg('저장했어요. 이 기기에 보관됩니다.');$('#searchStatus').textContent='설정을 저장했어요.'};
 
 function links(q){
+  if(!q){const m='<div class="note" style="grid-column:1/-1;text-align:center;margin:0">상품명을 입력하고 검색을 누르면 바로가기가 나와요</div>';
+    $('#krLinks').innerHTML=m;$('#qkLinks').innerHTML=m;return}
   const e=encodeURIComponent(q);
-  $('#krLinks').innerHTML=[
+  const h=[
     ['네이버 쇼핑 (최저가순)',`https://search.shopping.naver.com/search/all?query=${e}&sort=price_asc`],
     ['다나와',`https://search.danawa.com/dsearch.php?query=${e}`],
     ['쿠팡',`https://www.coupang.com/np/search?q=${e}`],
     ['에누리',`https://www.enuri.com/search.jsp?keyword=${e}`]
   ].map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('');
+  $('#krLinks').innerHTML=h;$('#qkLinks').innerHTML=h;
+}
+function jpLinks(q){
+  const e=encodeURIComponent(q);
   const g=s=>`https://www.google.com/search?q=${encodeURIComponent(s)}&tbs=qdr:m3`;
   $('#jpLinks').innerHTML=[
+    ['마츠모토키요시 사이트',`https://www.google.com/search?q=${encodeURIComponent('site:matsukiyo.co.jp '+q)}`],
     ['구글 · 일본 매장 가격',g(`${q} 価格 店頭 ヨドバシ ビックカメラ`)],
-    ['구글 · 일본 후기/가격',g(`${q} 日本 店頭価格 最安`)],
     ['가격.com (kakaku)',`https://kakaku.com/search_results/${e}/`],
     ['요도바시카메라',`https://www.yodobashi.com/?word=${e}`],
     ['빅카메라',`https://www.biccamera.com/bc/category/?q=${e}`],
-    ['돈키호테',`https://www.google.com/search?q=${encodeURIComponent('ドン・キホーテ '+q+' 価格')}&tbs=qdr:m3`]
+    ['돈키호테',g('ドン・キホーテ '+q+' 価格')]
   ].map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('');
 }
-links('');
 
-let domLow=0;
+/* ---------- 공통 ---------- */
+const curQ=()=>$('#q').value.trim().toLowerCase();
+const rateV=()=>parseNum($('#jpRate').value);
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const toKrw=y=>Math.round(y*rateV()/100);
+let domRows=load('sn_domrows',{});
+let jpRec=load('sn_jprec',[]);
+const rowsOf=()=>domRows[curQ()||'_']||[];
+const setRows=r=>{domRows[curQ()||'_']=r;save('sn_domrows',domRows)};
+const minDom=()=>{const r=rowsOf().filter(x=>x.p>0);return r.length?r.reduce((a,b)=>b.p<a.p?b:a):null};
+const jpOf=()=>{const q=curQ(),lim=Date.now()-90*864e5;return jpRec.filter(x=>x.ts>=lim&&(!q||x.q===q)).sort((a,b)=>a.yen-b.yen)};
+
+/* ---------- 비교 요약 ---------- */
+function renderCompare(){
+  const dom=minDom(),jps=jpOf(),jp=jps[0]||null,rate=rateV();
+  let h='';
+  h+=`<div class="cmpline"><div>🇰🇷 국내 최저${dom?` <span>${esc(dom.m||'쇼핑몰 미입력')}</span>`:''}</div><b>${dom?won(dom.p):'—'}</b></div>`;
+  h+=`<div class="cmpline"><div>🇯🇵 일본 최저${jp?` <span>${esc(jp.store)}</span>`:''}</div><b>${jp?'¥'+jp.yen.toLocaleString()+(rate?' ≈ '+won(toKrw(jp.yen)):''):'—'}</b></div>`;
+  if(dom&&jp&&rate){
+    const krw=toKrw(jp.yen),d=krw-dom.p,pct=Math.round(Math.abs(d)/dom.p*1000)/10;
+    h+=d<0?`<div class="verdict jp">일본이 ${won(-d)} (${pct}%) 저렴해요</div>`
+      :d>0?`<div class="verdict">국내가 ${won(d)} (${pct}%) 저렴해요</div>`
+      :`<div class="verdict">국내와 일본 가격이 같아요</div>`;
+  }else{
+    const need=[];if(!dom)need.push('국내 가격');if(!jp)need.push('일본 가격 기록');if(!rate)need.push('환율');
+    h+=`<div class="note" style="text-align:center">${need.join(', ')}을(를) 입력하면 비교해 드려요.</div>`;
+  }
+  $('#cmp').innerHTML=h;
+}
+
+/* ---------- 국내 가격 (붙여넣기 정리 + 직접 입력) ---------- */
+const MALLS=['쿠팡','네이버','스마트스토어','11번가','G마켓','지마켓','옥션','SSG','신세계','롯데온','롯데마트','위메프','티몬','인터파크','컬리','올리브영','홈플러스','이마트','하이마트','카카오','알리','테무','무신사','오늘의집','GS','CJ','현대','AK몰'];
+const NOISE=/^(광고|배송비|무료배송|무료|리뷰|구매|찜|최저가|판매처|쇼핑몰|가격비교|더보기|관련|인기|할인|쿠폰|혜택|적립|도착|내일|오늘|배송|네이버페이|톡톡|상품|정보|카드|평점|별점)/;
+function parsePaste(text){
+  const lines=text.split(/\r?\n/).map(l=>l.replace(/\s+/g,' ').trim()).filter(Boolean);
+  const PR=/(\d{1,3}(?:,\d{3})+|\d{3,9})\s*원/;
+  const BAD=/당\s*[\d,]+\s*원|배송비|적립|쿠폰|포인트|이상 구매|이상 무료|카드/;
+  const mallIn=l=>MALLS.some(m=>l.toLowerCase().includes(m.toLowerCase()));
+  const shortName=l=>l.length>=2&&l.length<=16&&!/원/.test(l)&&!/^[\d,.\s%~\-+]+$/.test(l)&&!NOISE.test(l);
+  const out=[],seen=new Set();
+  lines.forEach((l,i)=>{
+    const m=l.match(PR);if(!m||BAD.test(l))return;
+    const price=parseInt(m[1].replace(/,/g,''),10);
+    if(!(price>=100&&price<=100000000))return;
+    let mall='';
+    let best=null;
+    for(const d of [0,1,2,3]){
+      for(const k of (d===0?[i]:[i-d,i+d])){
+        if(lines[k]&&mallIn(lines[k])){const t=lines[k].replace(PR,'').trim();
+          best=(t.length>=2&&t.length<=16)?t:MALLS.find(x=>lines[k].toLowerCase().includes(x.toLowerCase()));break}
+      }
+      if(best)break;
+    }
+    if(best)mall=best;
+    if(!mall){const before=l.slice(0,l.indexOf(m[0])).trim();if(shortName(before))mall=before}
+    if(!mall){for(const k of [i+1,i+2,i+3]){if(lines[k]&&shortName(lines[k])&&!PR.test(lines[k])){mall=lines[k];break}}}
+    const key=mall+'|'+price;if(seen.has(key))return;seen.add(key);
+    out.push({m:mall||'',p:price});
+  });
+  return out.sort((a,b)=>a.p-b.p);
+}
+function markLow(){
+  const d=minDom(),nodes=[...document.querySelectorAll('#domRows .rowedit')];
+  nodes.forEach((n,i)=>{const r=rowsOf()[i];n.classList.toggle('low',!!(d&&r&&r.p===d.p&&r.p>0&&nodes.findIndex((_,j)=>rowsOf()[j]&&rowsOf()[j].p===d.p)===i))});
+}
+function renderDom(){
+  const rows=rowsOf();
+  $('#domRows').innerHTML=rows.length?rows.map((r,i)=>`<div class="rowedit" data-i="${i}">
+    <input class="m" placeholder="쇼핑몰" value="${esc(r.m)}" data-f="m" autocomplete="off">
+    <input class="p" type="text" inputmode="decimal" autocomplete="off" placeholder="가격(원)" value="${r.p?numStr(r.p):''}" data-f="p">
+    <button class="del" data-f="del" aria-label="삭제">×</button></div>`).join('')
+    :'<div class="empty" style="padding:14px 0">아직 없어요. 붙여넣기로 정리하거나 직접 추가하세요.</div>';
+  markLow();renderCompare();
+}
+$('#pasteGo').onclick=()=>{
+  const t=$('#pasteBox').value;if(!t.trim()){$('#pasteMsg').textContent='먼저 복사한 내용을 붙여넣어 주세요.';return}
+  const found=parsePaste(t);
+  if(!found.length){$('#pasteMsg').textContent='가격(○○원)을 찾지 못했어요. 결과 화면 전체를 복사했는지 확인하거나 직접 추가해 주세요.';return}
+  const cur=rowsOf(),keys=new Set(cur.map(r=>r.m+'|'+r.p));
+  const add=found.filter(r=>!keys.has(r.m+'|'+r.p));
+  setRows(cur.concat(add).sort((a,b)=>(a.p||Infinity)-(b.p||Infinity)));
+  $('#pasteBox').value='';
+  $('#pasteMsg').textContent=`${add.length}건을 정리했어요. 쇼핑몰 이름이 틀리면 직접 고쳐 주세요.`;
+  renderDom();
+};
+$('#addRow').onclick=()=>{setRows(rowsOf().concat([{m:'',p:0}]));renderDom();
+  const n=document.querySelectorAll('#domRows .rowedit .m');if(n.length)n[n.length-1].focus()};
+$('#domRows').addEventListener('input',e=>{
+  const row=e.target.closest('.rowedit');if(!row)return;
+  const rows=rowsOf(),r=rows[+row.dataset.i];if(!r)return;
+  if(e.target.dataset.f==='m')r.m=e.target.value;
+  if(e.target.dataset.f==='p'){fmtField(e.target);r.p=parseNum(e.target.value)}
+  setRows(rows);markLow();renderCompare();
+});
+$('#domRows').addEventListener('click',e=>{
+  if(e.target.dataset.f!=='del')return;
+  const i=+e.target.closest('.rowedit').dataset.i;
+  const rows=rowsOf().slice();rows.splice(i,1);setRows(rows);renderDom();
+});
+
+/* ---------- 일본 가격 기록 ---------- */
+function renderJpRec(){
+  const rows=jpOf(),rate=rateV();
+  $('#jpRec').innerHTML=rows.length?rows.map((x,n)=>`<div class="res">
+    <div class="t">${n===0?'<span class="badge">일본 최저</span><br>':''}<b>${esc(x.store)}</b>
+      <div class="m">${new Date(x.ts).toLocaleDateString('ko-KR')}${curQ()?'':' · '+esc(x.q)}</div></div>
+    <div style="text-align:right;flex:none"><div class="p">¥${x.yen.toLocaleString()}</div>${rate?`<div class="sub">≈ ${won(toKrw(x.yen))}</div>`:''}</div>
+    <button class="del" data-ts="${x.ts}" data-q="${esc(x.q)}" aria-label="삭제">×</button></div>`).join('')
+    :'<div class="empty" style="padding:14px 0">기록이 없어요. 사이트에서 확인한 가격을 기록해 보세요.</div>';
+  renderCompare();
+}
+$('#jpAdd').onclick=()=>{
+  const q=curQ(),store=$('#jpStore').value.trim(),yen=parseNum($('#jpYen').value),ds=$('#jpDate').value||todayStr();
+  if(!q){$('#searchStatus').textContent='먼저 위에서 검색어를 입력해 주세요.';$('#q').focus();return}
+  if(!store||!yen){$('#searchStatus').textContent='매장과 엔화 가격을 입력해 주세요.';return}
+  const ts=new Date(ds+'T12:00:00').getTime();
+  jpRec.push({ts,q,store,yen});save('sn_jprec',jpRec);
+  $('#jpYen').value='';$('#searchStatus').textContent='기록했어요.';renderJpRec();
+};
+$('#jpYen').addEventListener('input',e=>fmtField(e.target));
+$('#jpRec').addEventListener('click',e=>{
+  if(!e.target.dataset.ts)return;
+  const ts=+e.target.dataset.ts,q=e.target.dataset.q;
+  const i=jpRec.findIndex(x=>x.ts===ts&&x.q===q);if(i>=0){jpRec.splice(i,1);save('sn_jprec',jpRec)}
+  renderJpRec();
+});
+$('#jpRate').addEventListener('input',e=>{fmtField(e.target);save('sn_rate',rateV()||'');renderJpRec()});
+
+/* ---------- 블로그·카페 자동 검색 (선택, API 설정 필요) ---------- */
 const ready=()=>cfg.id&&cfg.secret&&cfg.proxy;
 async function api(path,params){
   const url=cfg.proxy.replace(/\/?$/,'/')+path+'?'+new URLSearchParams(params);
@@ -392,17 +604,7 @@ async function api(path,params){
   return r.json();
 }
 const clean=s=>String(s||'').replace(/<[^>]+>/g,'').replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#0?39;/g,"'").replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
-
-function jpLinks(q){
-  const e=encodeURIComponent((q?q+' ':'')+'일본 가격 엔');
-  $('#jpLinks').innerHTML=[
-    ['네이버 블로그 (3개월)',`https://search.naver.com/search.naver?ssc=tab.blog.all&query=${e}&nso=so:dd,p:3m`],
-    ['네이버 카페 (3개월)',`https://search.naver.com/search.naver?ssc=tab.cafe.all&query=${e}&nso=so:dd,p:3m`]
-  ].map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('');
-}
-
-/* 일본 오프라인 가격 (네이버 블로그/카페 → 가격 추출) */
-const STORES=['돈키호테','돈키','빅카메라','요도바시','마츠모토키요시','마쓰모토키요시','마츠키요','선드럭','스기약국','웰시아','다이코쿠','로프트','도큐핸즈','핸즈','무인양품','무지','유니클로','다이소','코스트코','빅씨','세리아','캔두','쓰루하','산리오','포켓몬센터','디즈니스토어','ABC마트','ビックカメラ','ヨドバシ','ドンキ','ドン・キホーテ'];
+const STORES=['돈키호테','돈키','빅카메라','요도바시','마츠모토키요시','마쓰모토키요시','마츠키요','선드럭','스기약국','웰시아','다이코쿠','로프트','도큐핸즈','핸즈','무인양품','무지','유니클로','다이소','코스트코','쓰루하','산리오','포켓몬센터','ABC마트','ビックカメラ','ヨドバシ','ドンキ','ドン・キホーテ'];
 const YEN=/(?:¥|￥)\s*([\d,]{3,7})|([\d,]{3,7})\s*(?:엔|円|yen)/i;
 function parseJp(text){
   const m=text.match(YEN);if(!m)return null;
@@ -415,8 +617,7 @@ function parseJp(text){
 async function jpSearch(q){
   const st=$('#jpStatus'),box=$('#jpList');
   st.textContent='네이버 블로그·카페에서 가격 찾는 중…';box.innerHTML='';
-  const rate=+$('#jpRate').value||0;save('sn_rate',rate||'');
-  domLow=parseNum($('#domPrice').value);save('sn_dom',domLow||'');
+  const rate=rateV(),dom=minDom(),domLow=dom?dom.p:0;
   const term=q+' 일본 가격 엔';
   const [bl,cf]=await Promise.allSettled([
     api('search/v1/blog',{query:term,display:100,sort:'date'}),
@@ -427,21 +628,21 @@ async function jpSearch(q){
     const text=clean(it.title)+' '+clean(it.description);
     const p=parseJp(text);if(!p)return;
     seen.add(it.link);
-    cand.push({...p,date,kind,title:clean(it.title),link:it.link,krw:rate?Math.round(p.yen*rate/100):0});
+    cand.push({...p,date,kind,title:clean(it.title),link:it.link,krw:rate?toKrw(p.yen):0});
   };
   if(bl.status==='fulfilled')(bl.value.items||[]).forEach(it=>{
     const d=it.postdate?new Date(it.postdate.replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3')):null;
     if(d&&d.getTime()>=lim)push(it,d,'블로그')});
   if(cf.status==='fulfilled')(cf.value.items||[]).forEach(it=>push(it,null,'카페'));
   if(bl.status==='rejected'&&cf.status==='rejected'){st.textContent='검색 실패: '+String(bl.reason&&bl.reason.message||'알 수 없는 오류').slice(0,160)+' — 키·프록시 설정을 확인해 주세요.';return}
-  if(!cand.length){st.textContent='최근 3개월 글에서 가격 정보를 찾지 못했어요. 아래 링크로 직접 확인해 보세요.';return}
+  if(!cand.length){st.textContent='최근 3개월 글에서 가격 정보를 찾지 못했어요.';return}
   cand.sort((a,b)=>a.yen-b.yen);
   const top=cand.slice(0,5);
-  st.textContent=`가격이 적힌 글 ${cand.length}건 중 낮은 순 ${top.length}건${rate?'':' · 100엔당 원 환율을 입력하면 원화로 비교돼요'}`;
+  st.textContent=`가격이 적힌 글 ${cand.length}건 중 낮은 순 ${top.length}건`;
   box.innerHTML=top.map((x,n)=>{
     let diff='';
     if(x.krw&&domLow){const d=x.krw-domLow;
-      diff=`<div class="sub" style="color:${d<0?'var(--good)':'var(--warn)'}">내가 확인한 국내 가격보다 ${won(Math.abs(d))} ${d<0?'저렴':'비쌈'}</div>`}
+      diff=`<div class="sub" style="color:${d<0?'var(--good)':'var(--warn)'}">국내 최저보다 ${won(Math.abs(d))} ${d<0?'저렴':'비쌈'}</div>`}
     return `<a class="res" href="${esc(x.link)}" target="_blank" rel="noopener">
       <div class="t">${n===0?'<span class="badge">일본 최저</span><br>':''}<b>${esc(x.store||'매장 미확인')}</b>
         <div class="m">${x.date?x.date.toLocaleDateString('ko-KR'):'날짜 확인불가'} · 네이버 ${x.kind}</div>
@@ -449,28 +650,78 @@ async function jpSearch(q){
       <div style="text-align:right;flex:none"><div class="p">¥${x.yen.toLocaleString()}</div>
         ${x.krw?`<div class="sub">≈ ${won(x.krw)}</div>`:''}${diff}</div></a>`}).join('');
 }
+$('#jpGo').onclick=()=>{
+  const q=$('#q').value.trim();
+  if(!q){$('#jpStatus').textContent='먼저 위에서 검색어를 입력해 주세요.';return}
+  if(!ready()){$('#cfgBox').open=true;$('#jpStatus').textContent='맨 아래 API 설정이 필요해요.';return}
+  jpSearch(q).catch(e=>{$('#jpStatus').textContent='검색에 실패했어요: '+String(e.message||'').slice(0,160)})};
 
-async function search(){
+/* ---------- 검색 ---------- */
+function search(){
   const q=$('#q').value.trim();const ss=$('#searchStatus');
   if(!q){ss.textContent='검색어를 입력해 주세요.';return}
-  links(q);jpLinks(q);
-  ss.textContent='국내 가격은 아래 바로가기로 확인하고, 일본 가격은 자동으로 찾아요.';
-  if(!ready()){
-    $('#jpStatus').textContent='일본 가격 자동 검색은 맨 아래 API 설정이 필요해요.';
-    $('#cfgBox').open=true;return}
-  $('#jpList').innerHTML='';$('#jpStatus').textContent='';
-  try{await jpSearch(q)}catch(e){$('#jpStatus').textContent='일본 가격 검색에 실패했어요: '+String(e.message||'').slice(0,160)}
+  links(q);jpLinks(q);renderDom();renderJpRec();
+  ss.textContent='바로가기로 가격을 확인하고, 아래에 정리해 비교해 보세요.';
 }
 $('#goBtn').onclick=search;
-$('#jpGo').onclick=()=>{const q=$('#q').value.trim();if(!q){$('#jpStatus').textContent='검색어를 입력해 주세요.';return}
-  if(!ready()){$('#cfgBox').open=true;$('#jpStatus').textContent='API 설정이 필요해요.';return}
-  jpLinks(q);jpSearch(q).catch(()=>{$('#jpStatus').textContent='일본 가격 검색에 실패했어요.'})};
 $('#q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
-$('#jpRate').value=load('sn_rate','');
-$('#domPrice').value=load('sn_dom','')?numStr(load('sn_dom','')):'';
-$('#domPrice').addEventListener('input',e=>fmtField(e.target));
-jpLinks('');
-if(!ready())$('#cfgBox').open=true;
+$('#q').addEventListener('input',()=>{renderDom();renderJpRec()});
+$('#jpRate').value=load('sn_rate','')?numStr(load('sn_rate','')):'';
+$('#jpDate').value=todayStr();
+
+/* ---------- 현장 바로 비교 ---------- */
+let hist=load('sn_hist',[]);
+const qs=load('sn_qc',{mode:'in',rate:'10'});
+$('#qjTax').value=qs.mode;$('#qjRate').value=qs.rate;
+function qcCalc(){
+  const yen=parseNum($('#qjYen').value),kr=parseNum($('#qkKrw').value),fx=rateV();
+  const jn=Math.max(1,Math.round(parseNum($('#qjN').value))||1),kn=Math.max(1,Math.round(parseNum($('#qkN').value))||1);
+  const mode=$('#qjTax').value,r=(+$('#qjRate').value||10)/100;
+  return{yen,kr,fx,jn,kn,mode,r,inc:mode==='in'?yen:yen*(1+r),exc:mode==='in'?yen/(1+r):yen};
+}
+function qcLine(title,yenTotal,c){
+  const perYen=yenTotal/c.jn,perKrw=Math.round(perYen*c.fx/100),krPer=c.kr/c.kn,d=perKrw-krPer,pct=krPer?Math.round(Math.abs(d)/krPer*1000)/10:0;
+  const unit=(c.jn>1||c.kn>1)?'개당 ':'';
+  const verdict=Math.abs(d)<1?'국내와 거의 같아요':d<0?`일본이 ${unit}${won(Math.round(-d))} (${pct}%) 저렴`:`국내가 ${unit}${won(Math.round(d))} (${pct}%) 저렴`;
+  return{perYen,perKrw,d,pct,verdict,html:`<div class="qres"><div class="t">${title}</div>
+    <div class="v ${d<0?'jp':''}">${verdict}</div>
+    <div class="s">일본 ${unit}¥${Math.round(perYen).toLocaleString()} ≈ ${won(perKrw)} · 국내 ${unit}${won(Math.round(krPer))}</div></div>`};
+}
+function renderQuick(){
+  const c=qcCalc(),out=$('#qcOut');
+  const need=[];if(!c.yen)need.push('일본 가격');if(!c.kr)need.push('국내 가격');if(!c.fx)need.push('환율');
+  if(need.length){out.innerHTML=`<div class="note" style="text-align:center;margin:0">${need.join(', ')}을(를) 입력하면 바로 비교해요.</div>`;return}
+  const a=qcLine('세금 포함 가격 기준 (일반 구매)',c.inc,c),b=qcLine('세금 제외 기준 (면세 적용 시)',c.exc,c);
+  out.innerHTML=a.html+b.html;
+}
+function renderHist(){
+  $('#hist').innerHTML=hist.length?hist.slice(0,20).map(h=>{
+    const c={yen:h.yen,kr:h.kr,fx:h.fx,jn:h.jn,kn:h.kn,mode:h.mode,r:h.r,inc:h.mode==='in'?h.yen:h.yen*(1+h.r),exc:h.mode==='in'?h.yen/(1+h.r):h.yen};
+    const a=qcLine('',c.inc,c);
+    return `<div class="res"><div class="t"><b>${esc(h.name||'이름 없음')}</b>
+      <div class="m">${new Date(h.ts).toLocaleDateString('ko-KR')} · ¥${h.yen.toLocaleString()}${h.mode==='ex'?' (세금 별도)':''} / 국내 ${won(h.kr)}</div>
+      <div class="m" style="color:${a.d<0?'var(--good)':'var(--text)'};font-weight:700">${esc(a.verdict)}</div></div>
+      <button class="del" data-ts="${h.ts}" aria-label="삭제">×</button></div>`}).join('')
+    :'<div class="empty" style="padding:14px 0">저장한 비교가 여기에 쌓여요.</div>';
+}
+['#qjYen','#qkKrw'].forEach(id=>$(id).addEventListener('input',e=>{fmtField(e.target);renderQuick()}));
+['#qjN','#qkN'].forEach(id=>$(id).addEventListener('input',e=>{e.target.value=e.target.value.replace(/[^\d]/g,'');renderQuick()}));
+['#qjTax','#qjRate'].forEach(id=>$(id).addEventListener('change',()=>{save('sn_qc',{mode:$('#qjTax').value,rate:$('#qjRate').value});renderQuick()}));
+$('#jpRate').addEventListener('input',renderQuick);
+$('#qcSave').onclick=()=>{
+  const c=qcCalc();
+  if(!c.yen||!c.kr){$('#searchStatus').textContent='일본 가격과 국내 가격을 입력해 주세요.';return}
+  hist.unshift({ts:Date.now(),name:$('#q').value.trim(),yen:c.yen,mode:c.mode,r:c.r,kr:c.kr,jn:c.jn,kn:c.kn,fx:c.fx||0});
+  hist=hist.slice(0,50);save('sn_hist',hist);renderHist();
+  $('#searchStatus').textContent='기록했어요.';
+  $('#qjYen').value='';$('#qkKrw').value='';renderQuick();
+};
+$('#hist').addEventListener('click',e=>{
+  if(!e.target.dataset.ts)return;
+  hist=hist.filter(h=>h.ts!==+e.target.dataset.ts);save('sn_hist',hist);renderHist();
+});
+
+links('');jpLinks('');renderDom();renderJpRec();renderQuick();renderHist();
 
 </script>
 </body>
